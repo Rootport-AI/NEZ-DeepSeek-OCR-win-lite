@@ -1,0 +1,119 @@
+<!-- static/index.html -->
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>NEZ-DeepSeek-OCR GUI</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="icon" href="/static/favicon.ico" />
+</head>
+<body>
+  <header>
+    <h1>NEZ-DeepSeek-OCR GUI</h1>
+    <div class="meta">
+      <button id="pingBtn" title="/healthzにPing">サーバーチェック</button>
+      <span id="health">未確認</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="pane">
+      <h2>1) 画像を選択</h2>
+      <div id="preview" class="preview">
+        <div id="previewInner" class="preview-inner">
+          <img id="previewImg" alt="preview" hidden />
+          <div id="previewEmpty" class="preview-empty">ここに画像をドラッグ＆ドロップ</div>
+        </div>
+        <div class="preview-actions">
+          <input id="fileInput" type="file" accept="image/*" hidden />
+          <button id="openFileBtn" class="openfile-btn">ファイルを開く</button>
+        </div>
+      </div>
+
+      <div class="controls">
+        <label>プロンプト
+          <textarea id="prompt" rows="3"><image>
+<|grounding|>Convert the document to markdown.</textarea>
+        </label>
+
+        <!-- プロンプト・プリセット -->
+        <div class="presets">
+          <button class="preset-btn"
+                  data-prompt="<image>
+<|grounding|>Convert the document to markdown.">
+            Standard
+          </button>
+          <button class="preset-btn"
+                  data-prompt="<image>
+Free OCR.">
+            Long Text
+          </button>
+          <button class="preset-btn"
+                  data-prompt="<image>
+Parse the figure.">
+            Charts & Figures
+          </button>
+        </div>
+        <button id="runBtn" disabled>OCRを実行</button>
+      </div>
+
+        <div class="grid grid-folder">
+          <label>フォルダパス
+            <input id="folderPath" type="text" placeholder="例）S:\Receipts\2025-03" />
+          </label>
+          <div style="display:flex; align-items:flex-end;">
+            <button id="runFolderBtn">まとめてOCRを実行</button>
+          </div>
+        </div>
+      
+        <div class="grid grid-2col">
+          <label>base_size <input id="baseSize" type="number" value="1024" min="256" step="64"></label>
+          <label>image_size <input id="imageSize" type="number" value="640" min="256" step="32"></label>
+          <label class="check"><input id="cropMode" type="checkbox" checked> crop_mode</label>
+          <label class="check"><input id="testCompress" type="checkbox"> test_compress（ログ）</label>
+        </div>
+
+      </section>
+
+    <section class="pane">
+      <h2>2) 結果</h2>
+      <div class="resultBar">
+        <button id="copyBtn" disabled>コピー</button>
+        <span id="status">待機中</span>
+      </div>
+
+      <!-- 出力欄（ローダーのオーバーレイ付き） -->
+      <div class="output-wrap">
+        <div id="loader" class="loader-overlay" aria-live="polite" aria-busy="true" hidden>
+          <div class="loader-box">
+            <div class="spinner" role="presentation"></div>
+            <div class="progress">
+              <div class="progress-track">
+                <div class="progress-bar" id="progBar" style="width:0%"></div>
+              </div>
+              <div class="progress-text" id="progText">0%</div>
+            </div>
+          </div>
+        </div>
+
+        <textarea id="output" rows="18" spellcheck="false"
+          placeholder="ここにOCR結果（Markdown/テキスト）が表示されます"></textarea>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <small>DeepSeek-OCR Minimal • Python 3.10 / FastAPI • ローカル実行</small>
+  </footer>
+  
+  <div id="globalDropOverlay" class="drop-overlay" hidden>
+    <div class="drop-overlay-inner" role="dialog" aria-live="polite">
+      <p>画像ファイルを入力しますか？<br/>ドロップでファイル追加</p>
+      <small id="overlayNote" class="note"></small>
+    </div>
+  </div>
+
+  <script src="/static/main.js"></script>
+</body>
+</html>
