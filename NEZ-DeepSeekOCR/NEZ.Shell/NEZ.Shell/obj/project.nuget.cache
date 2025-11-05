@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "vf88LquS4iQ=",
+  "success": true,
+  "projectFilePath": "S:\\OriginalApps\\07_NEZ-DeepSeek-OCR-win-lite\\NEZ-DeepSeekOCR\\NEZ.Shell\\NEZ.Shell\\NEZ.Shell.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\phenotype nezu\\.nuget\\packages\\microsoft.web.webview2\\1.0.2420.47\\microsoft.web.webview2.1.0.2420.47.nupkg.sha512",
+    "C:\\Users\\phenotype nezu\\.nuget\\packages\\system.text.json\\8.0.5\\system.text.json.8.0.5.nupkg.sha512",
+    "C:\\Users\\phenotype nezu\\.nuget\\packages\\microsoft.windows.sdk.net.ref\\10.0.19041.57\\microsoft.windows.sdk.net.ref.10.0.19041.57.nupkg.sha512"
+  ],
+  "logs": []
+}

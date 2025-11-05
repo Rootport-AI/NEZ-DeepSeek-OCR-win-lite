@@ -23,6 +23,27 @@ import torch
 from PIL import Image, ImageOps
 from transformers import AutoModel, AutoTokenizer
 
+# python二重起動の原因特定用
+import sys, os
+print(f"[BOOT] pid={os.getpid()} exe={sys.executable}", flush=True)
+
+#デバッグログの文字化け防止
+import sys
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
+except Exception:
+    pass
+
+# PyInstaller対応
+from pathlib import Path
+import sys, os
+
+def resource_path(rel: str) -> str:
+    """開発時: カレント / 凍結時: _MEIPASS から相対パスを返す"""
+    base = getattr(sys, "_MEIPASS", os.path.abspath("."))
+    return str(Path(base) / rel)
+
 APP_TITLE = "DeepSeek-OCR Minimal Server"
 MODEL_ID = os.getenv("DEEPSEEK_OCR_MODEL", "./DeepSeek-OCR")
 
@@ -352,9 +373,14 @@ async def _run_job_image(job_id: str, raw: bytes, cfg: Dict[str, Any]):
             im = Image.open(io.BytesIO(raw)).convert("RGB")
         tmp_dir = Path.cwd() / "_tmp_inputs"
         tmp_dir.mkdir(exist_ok=True)
+        # 一時ファイル名のみ確保（閉じてからパスに対して保存する）
         with tempfile.NamedTemporaryFile(delete=False, dir=tmp_dir, suffix=suffix) as tf:
-            im.save(tf, format=im.format or "PNG")
             tmp_path = Path(tf.name)
+        # 保存フォーマットは元画像の format を優先、無ければ PNG
+        save_fmt = ("PNG")
+        if 'probe' in locals() and getattr(probe, "format", None):
+            save_fmt = probe.format
+        im.save(tmp_path, format=save_fmt)
 
         # encode 開始
         await _emit(job_id, {"type": "progress", "pct": 25, "status": "encode"})
@@ -593,8 +619,13 @@ async def jobs_stream(job_id: str):
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 
-# 静的配信とルート
-app.mount("/static", StaticFiles(directory="static", html=True), name="static")
+# 静的配信とルート/PyInstaller対応済み
+static_dir = resource_path("static")
+app.mount("/static", StaticFiles(directory=static_dir, html=True), name="static")
+
+@app.get("/")
+def root():
+    return FileResponse(str(Path(static_dir) / "index.html"))
 
 @app.get("/")
 def root():
@@ -606,4 +637,7 @@ def favicon():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app:app", host="127.0.0.1", port=8000, reload=True)
+    # Supervisorをバイパスして“同一プロセス内”で起動する
+    config = uvicorn.Config(app=app, host="127.0.0.1", port=8000, reload=False)
+    server = uvicorn.Server(config)
+    server.run()
