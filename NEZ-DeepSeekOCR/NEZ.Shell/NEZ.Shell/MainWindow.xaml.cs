@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using Microsoft.Web.WebView2.Wpf;
 
 namespace NEZ.Shell;
 
@@ -22,9 +23,23 @@ public partial class MainWindow : Window
         _log = new Logger(_paths.LogDir);
         _settings = AppSettings.LoadOrDefault(_paths.SettingsPath,
             defaultPort: 8000,
-            defaultModelDir: System.IO.Path.Combine(_paths.Root, @"..\NEZ\DeepSeek-OCR"));
+            defaultModelDir: System.IO.Path.Combine(_paths.Root, @"NEZ\DeepSeek-OCR"));
+        // ★ WebView2 ユーザーデータを <Root>\NEZ\wv2 に固定（ポータブル運用）
+        var wv2Dir = System.IO.Path.Combine(_paths.Root, "NEZ", "wv2");
+        System.IO.Directory.CreateDirectory(wv2Dir);
+        // WebView2 コントロール名が "webView" の想定（あなたの XAML 名に合わせてください）
+        // EnsureCoreWebView2Async の前に CreationProperties を設定しておくことが重要
+        Web.CreationProperties = new CoreWebView2CreationProperties
+        {
+           UserDataFolder = wv2Dir
+        };
 
-        this.Loaded += async (_, __) => await BootAsync();
+        this.Loaded += async (_, __) =>
+        {
+           // 念のため明示的に Core 環境を起こしてからブート（UserDataFolder 反映を確実に）
+           try { await Web.EnsureCoreWebView2Async(); } catch { /* 初期化失敗は BootAsync 側の表示で分かる */ }
+           await BootAsync();
+        };
         this.Closing += (_, __) => Cleanup();
     }
 
