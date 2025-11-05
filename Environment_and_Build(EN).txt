@@ -1,0 +1,299 @@
+# NEZ-DeepSeek-OCR (Windows Native) – Environment & Build Notes
+
+## 0) TL;DR
+
+* **OS:** Windows 10/11 x64
+
+* **Python:** 3.10.11 (**stick to 3.10**)
+
+* **CUDA:** 11.8 for GPU usage; NVIDIA driver compatible with CUDA 11.8
+
+* **Torch:** 2.6.0+cu118
+
+* Runs via the **Transformers** path (not vLLM)
+
+* **Required packages:**
+  `torch==2.6.0+cu118`, `torchvision==0.21.0+cu118`, `torchaudio==2.6.0+cu118`,
+  `transformers==4.46.3`, `tokenizers==0.20.3`, `einops`, `addict`, `easydict`,
+  `fastapi==0.115.0`, `uvicorn[standard]==0.30.6`, `python-multipart`, `pillow==10.4.0`,
+  `numpy<2`, `typing-extensions==4.12.2`
+
+* **Optional (auto-used if present):** `flash-attn` (falls back to `eager` if absent)
+
+* **Model placement:** keep the **entire DeepSeek-OCR Hugging Face repo locally** (not bundled)
+
+* **Build:** PyInstaller **onedir + console** (easier for distribution & debugging)
+  Use `--hidden-import addict/easydict/einops` and
+  `--collect-all torch/transformers/tokenizers` to avoid missing runtime deps.
+
+---
+
+## 1) Directory layout (expected / actual)
+
+Install location (expected):
+
+```
+%ProgramFiles%\NEZ-DeepSeekOCR\
+  NEZ.Shell.exe                 ← WebView2 shell (WPF)
+  runtime\venv\...              ← bundled Python venv (for dev builds)
+  server\
+    app.py
+    static\ (index.html, main.js, style.css)
+  assets\ (icons, etc)
+```
+
+Shared/mutable data:
+
+```
+%PROGRAMDATA%\NEZ\DeepSeek-OCR\...   ← DeepSeek-OCR repo (incl. model) — user-provided
+%LOCALAPPDATA%\NEZ\
+  settings.json
+  logs\*.log
+```
+
+Dev tree (example):
+
+```
+S:\OriginalApps\07_NEZ-DeepSeek-OCR-win-lite\
+  NEZ-DeepSeekOCR\
+    runtime\venv\...                 ← Python 3.10.11
+    server\app.py, static\...
+    dist\NEZ.Server\NEZ.Server.exe   ← PyInstaller onedir output (console)
+  NEZ\DeepSeek-OCR\...               ← local clone of HF repo
+```
+
+---
+
+## 2) Python / CUDA / Torch prerequisites
+
+* **Python:** 3.10.11 (DeepSeek-OCR is developed on Python 3.12, but this app is **validated on 3.10.11**)
+* **CUDA:** 11.8 (`torch==2.6.0+cu118`). CPU-only works (slower).
+* **GPU:** validated on GeForce RTX 4070 Ti SUPER.
+
+---
+
+## 3) venv setup (developer, PowerShell)
+
+> Do **not** use `py.exe`. Always invoke the venv’s `python.exe` by **absolute path** (avoids “double-Python” issues).
+
+```powershell
+# Example root
+$Root = 'S:\OriginalApps\07_NEZ-DeepSeek-OCR-win-lite\NEZ-DeepSeekOCR'
+Set-Location "$Root\server"
+
+# Create venv (assuming Python 3.10 on PATH)
+python -m venv ..\runtime\venv
+
+# Pin venv python
+$py = "$Root\runtime\venv\Scripts\python.exe"
+
+# Upgrade pip
+& $py -m pip install --upgrade pip
+
+# Install deps (cu118 channel)
+@'
+--index-url https://download.pytorch.org/whl/cu118
+--extra-index-url https://pypi.org/simple
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+python-multipart==0.0.12
+pillow==10.4.0
+torch==2.6.0+cu118
+torchvision==0.21.0+cu118
+torchaudio==2.6.0+cu118
+transformers==4.46.3
+tokenizers==0.20.3
+einops
+addict==2.4.0
+easydict
+numpy<2
+typing-extensions==4.12.2
+'@ | Set-Content -Encoding utf8 .\.requirements.tmp.txt
+
+& $py -m pip install -r .\.requirements.tmp.txt
+Remove-Item .\.requirements.tmp.txt
+```
+
+**Optional:**
+
+```powershell
+# flash-attn, if desired (may require build toolchain)
+# & $py -m pip install --no-build-isolation flash-attn==2.7.3
+```
+
+**Sanity checks:**
+
+```powershell
+& $py -V
+& $py -c "import torch, json; print(json.dumps({'cuda': torch.cuda.is_available(), 'ver': torch.__version__}))"
+& $py -c "import transformers, tokenizers, einops, addict, easydict; print('imports: ok')"
+```
+
+---
+
+## 4) Model placement (DeepSeek-OCR repo)
+
+* **Policy:** model/repo is **not bundled**; user downloads/places it locally.
+* **Default location:**
+  `DEEPSEEK_OCR_MODEL=%PROGRAMDATA%\NEZ\DeepSeek-OCR`
+  (override with any local path during development)
+* **Server load path:**
+  `AutoTokenizer/AutoModel.from_pretrained(MODEL_DIR, trust_remote_code=True, local_files_only=True)`
+
+---
+
+## 5) “Freeze-aware” tweaks in the server (FastAPI)
+
+* Resolve `static/` with **_MEIPASS** so both onefile/onedir work transparently:
+
+  ```python
+  from pathlib import Path
+  import sys, os
+
+  def resource_path(rel: str) -> str:
+      base = getattr(sys, "_MEIPASS", os.path.abspath("."))
+      return str(Path(base) / rel)
+
+  static_dir = resource_path("static")
+  app.mount("/static", StaticFiles(directory=static_dir, html=True), name="static")
+
+  @app.get("/")
+  def root():
+      return FileResponse(str(Path(static_dir) / "index.html"))
+  ```
+
+* Uvicorn port defaults to `127.0.0.1:8000` (the shell’s WebView2 targets this URL).
+
+---
+
+## 6) PyInstaller (onedir + console) build
+
+> Key point: **avoid missing dynamic imports** (`trust_remote_code` loads deps at runtime).
+> Use hidden-imports and collect-all for large libs.
+
+```powershell
+Set-Location "$Root\server"
+
+# Clean (optional)
+Remove-Item -Recurse -Force '.\build','.\dist','.\NEZ.Server.spec' -ErrorAction SilentlyContinue
+
+# onedir + console
+& $py -m PyInstaller app.py `
+  --name NEZ.Server `
+  --onedir --console `
+  --add-data 'static;static' `
+  --collect-all transformers `
+  --collect-all tokenizers `
+  --collect-all torch `
+  --hidden-import addict `
+  --hidden-import easydict `
+  --hidden-import einops `
+  --copy-metadata transformers `
+  --copy-metadata tokenizers `
+  --copy-metadata torch
+```
+
+**Output:**
+
+```
+server\dist\NEZ.Server\NEZ.Server.exe
+```
+
+> onefile is possible, but we currently **prefer onedir** (no extraction delay, fewer AV false positives).
+
+---
+
+## 7) Standalone run (EXE directly)
+
+```powershell
+Set-Location "$Root\server\dist\NEZ.Server"
+
+$env:USE_TF='0'
+$env:USE_TORCH='1'
+$env:DEEPSEEK_OCR_MODEL='S:\OriginalApps\07_NEZ-DeepSeek-OCR-win-lite\NEZ\DeepSeek-OCR'  # dev example
+$env:TQDM_DISABLE='1'
+
+.\NEZ.Server.exe
+# → open http://127.0.0.1:8000 in a browser
+```
+
+---
+
+## 8) Launch from the shell (WPF / WebView2)
+
+* The shell **starts `NEZ.Server.exe` directly** (not `python app.py`).
+* `PythonHost.cs` logic (essentials):
+
+  * If `server\dist\NEZ.Server\NEZ.Server.exe` exists → **launch it**
+  * Else fall back to **`runtime\venv\Scripts\python.exe app.py`** for dev
+  * **Environment variables** (`DEEPSEEK_OCR_MODEL`, `USE_TF`, `USE_TORCH`) are set in both cases
+
+> After launch, the shell polls `/healthz` and then navigates WebView2 to `http://127.0.0.1:8000/`.
+> We **ship with console** so users can see logs; ask them **not to close the black window**.
+
+---
+
+## 9) Known pitfalls / notes
+
+* **Uvicorn may crash with `--noconsole`** (no stdio → `isatty()` in default formatter).
+  Current stance: **ship with console** (also better for field diagnostics).
+
+* **Dynamic import omissions**
+  Model code loaded via `trust_remote_code` imports deps at runtime.
+  → Use `--hidden-import addict/easydict/einops` (and add more if errors reveal them).
+
+* **CUDA/DLL handling**
+  `--collect-all torch` usually brings required DLLs; target machines still need a compatible NVIDIA driver.
+
+---
+
+## 10) Minimal reproducible checklist
+
+1. Prepare Python 3.10.11 (no PATH requirement if using absolute venv path)
+2. `python -m venv runtime\venv` → `runtime\venv\Scripts\python.exe -m pip install ...` (packages above)
+3. Place the DeepSeek-OCR repo locally (prefer `%PROGRAMDATA%\NEZ\DeepSeek-OCR`)
+4. Confirm `_MEIPASS` handling in `server\app.py`
+5. Build with PyInstaller **onedir + console** (options above)
+6. Run `NEZ.Server.exe` → `/healthz` → single-image OCR → folder OCR
+7. Launch from the shell and repeat the same checks
+
+---
+
+## Appendix: requirements.txt (Transformers path, CUDA 11.8)
+
+```
+--index-url https://download.pytorch.org/whl/cu118
+--extra-index-url https://pypi.org/simple
+
+# Server
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+python-multipart==0.0.12
+pillow==10.4.0
+
+# PyTorch (CUDA 11.8)
+torch==2.6.0+cu118
+torchvision==0.21.0+cu118
+torchaudio==2.6.0+cu118
+
+# Transformers route
+transformers==4.46.3
+tokenizers==0.20.3
+einops
+addict==2.4.0
+easydict
+
+# Known-compat
+numpy<2
+typing-extensions==4.12.2
+```
+
+(Install `flash-attn` separately if desired/feasible.)
+
+---
+
+## Notes
+
+* **the venv has not committed** (large; OS/driver differences). This note provides everything needed to recreate it.
+* Model (DeepSeek-OCR) is **out of scope for distribution**; user places it locally or an installer offers to download it.
+* For bug reports, please attach the **full console log** and files from **`%LOCALAPPDATA%\NEZ\logs\`**.
