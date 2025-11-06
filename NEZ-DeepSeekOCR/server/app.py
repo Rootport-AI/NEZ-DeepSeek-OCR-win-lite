@@ -288,19 +288,24 @@ def ocr_folder(
 
 # ===================== ここからSSEジョブ版（進捗/サムネ） =====================
 
-JOBS: Dict[str, Dict[str, Any]] = {}  # {job_id: {"queue": asyncio.Queue, "done": bool, "result": str}}
+JOBS: Dict[str, Dict[str, Any]] = {}  # {job_id: {"queue": asyncio.Queue, "done": bool, "result": str, "backlog": list[str], "subscribers": int}}
 
 def _new_job() -> str:
     import uuid
     job_id = uuid.uuid4().hex
-    JOBS[job_id] = {"queue": asyncio.Queue(), "done": False, "result": ""}
+    JOBS[job_id] = {"queue": asyncio.Queue(), "done": False, "result": "", "backlog": [], "subscribers": 0}
     return job_id
 
 def _queue(job_id) -> asyncio.Queue:
     return JOBS[job_id]["queue"]
 
 async def _emit(job_id: str, payload: Dict[str, Any]):
-    await _queue(job_id).put(f"data: {json.dumps(payload, ensure_ascii=False)}\n\n")
+    msg = f"data: {json.dumps(payload, ensure_ascii=False)}\n\n"
+    # まず履歴に積む（後着接続にも再送できるように）
+    JOBS[job_id]["backlog"].append(msg)
+    # リアルタイム接続があればキューにも流す
+    if JOBS[job_id]["subscribers"] > 0:
+        await _queue(job_id).put(msg)
 
 def _thumb_dataurl_from_bytes(b: bytes, max_side: int = 320) -> str:
     im = Image.open(io.BytesIO(b))
@@ -598,24 +603,31 @@ async def jobs_stream(job_id: str):
         raise HTTPException(status_code=404, detail="job not found")
 
     async def event_generator():
-        # 既にdoneでも最低1回は流す
-        if JOBS[job_id]["done"]:
-            yield f"data: {json.dumps({'type':'done','pct':100,'status':'done','text':JOBS[job_id]['result']}, ensure_ascii=False)}\n\n"
-            return
-        queue = _queue(job_id)
-        while True:
-            try:
-                msg = await queue.get()
+        # 接続カウント
+        JOBS[job_id]["subscribers"] += 1
+        try:
+            # まずバックログを再送（過去の file_start/preview を確実に見せる）
+            for msg in JOBS[job_id]["backlog"]:
                 yield msg
-                # done/error の後は閉じる
+
+            queue = _queue(job_id)
+            # ここからはリアルタイム分を受け渡し
+            # （_emit は subscribers>0 のときだけ queue に入れる）
+            while True:
                 try:
-                    payload = json.loads(msg[len("data: "):-2])
-                    if payload.get("type") in ("done", "error"):
-                        break
-                except Exception:
-                    pass
-            except asyncio.CancelledError:
-                break
+                    msg = await queue.get()
+                    yield msg
+                    # done/error の後は閉じる
+                    try:
+                        payload = json.loads(msg[len("data: "):-2])
+                        if payload.get("type") in ("done", "error"):
+                            break
+                    except Exception:
+                        pass
+                except asyncio.CancelledError:
+                    break
+        finally:
+            JOBS[job_id]["subscribers"] = max(0, JOBS[job_id]["subscribers"] - 1)
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 
@@ -626,10 +638,6 @@ app.mount("/static", StaticFiles(directory=static_dir, html=True), name="static"
 @app.get("/")
 def root():
     return FileResponse(str(Path(static_dir) / "index.html"))
-
-@app.get("/")
-def root():
-    return FileResponse("static/index.html")
 
 @app.get("/favicon.ico")
 def favicon():

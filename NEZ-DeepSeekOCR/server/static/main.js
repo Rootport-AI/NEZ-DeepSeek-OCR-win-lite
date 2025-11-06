@@ -184,12 +184,18 @@ function attachSSE(jobId, onDone) {
       }
       if (t === "preview" && data.thumb) {
         previewImg.src = data.thumb;
+        const emptyEl = document.getElementById("previewEmpty");
+        if (emptyEl) emptyEl.hidden = true;
+        previewImg.hidden = false;             
         previewWrap.classList.remove("hidden");
       }
       if (t === "file_start") {
         setStatus(`処理中: ${data.filename} (${(data.current_index + 1)}/${data.total})`);
         if (data.thumb) {
           previewImg.src = data.thumb;
+          const emptyEl = document.getElementById("previewEmpty");
+          if (emptyEl) emptyEl.hidden = true;
+          previewImg.hidden = false;               // ★ フォルダOCRでも確実に表示
           previewWrap.classList.remove("hidden");
         }
         setProgress(data.pct ?? 0);
