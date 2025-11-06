@@ -21,15 +21,15 @@ DeepSeek-OCRのAI本体のデータおよび詳細な情報は、HuggingFaceの�
   アプリ本体が5GB超、AIモデルが12GB超あります。
 
 # インストール方法
-<img width="1093" height="808" alt="NEZ-DSOCR-winlite-HowtoDL" src="https://github.com/user-attachments/assets/70a53f3a-d117-4740-9edb-c244503b88dd" />
-1. 私の[HuggingFaceリポジトリ](https://huggingface.co/datasets/Rootport/NEZ-DeepSeek-OCR-win-lite/tree/main)を開いて、`NEZ-DSOCR-winlite.zip`(アプリ本体)、およびAI`DeepSeek-OCR.zip`(AI本体)をダウンロードします。
-2. インストールしたいディレクトリで`NEZ-DSOCR-winlite.zip`を展開してください。
-3. `DeepSeek-OCR.zip`を展開し、`\NEZ-DeepSeek-OCR-win-lite\NEZ"`に配置してください。
-4. `NEZ-DSOCR-winlite.exe`をダブルクリックするとアプリが起動します。
-5. 
-**注意:**アプリの起動時に一緒に立ち上がる「黒い画面」は、**閉じないでください。** デバッグ用のログがここに表示されます。アプリのウィンドウを閉じると、この「黒い画面」も一緒に閉じます。
+<img width="1093" height="808" alt="NEZ-DSOCR-winlite-HowtoDL" src="https://github.com/user-attachments/assets/70a53f3a-d117-4740-9edb-c244503b88dd" />  
 
-### ▼展開後のディレクトリ構成のイメージ▼
+1. 私の[HuggingFaceリポジトリ](https://huggingface.co/datasets/Rootport/NEZ-DeepSeek-OCR-win-lite/tree/main)を開いて、`NEZ-DSOCR-winlite.zip`(アプリ本体)、およびAI`DeepSeek-OCR.zip`(AI本体)をダウンロードします。  
+2. インストールしたいディレクトリで`NEZ-DSOCR-winlite.zip`を展開してください。  
+3. `DeepSeek-OCR.zip`を展開し、`\NEZ-DeepSeek-OCR-win-lite\NEZ"`に配置してください。  
+4. `NEZ-DSOCR-winlite.exe`をダブルクリックするとアプリが起動します。  
+**注意:**アプリの起動時に一緒に立ち上がる「黒い画面」は、**閉じないでください。** デバッグ用のログがここに表示されます。アプリのウィンドウを閉じると、この「黒い画面」も一緒に閉じます。  
+
+### ▼展開後のディレクトリ構成のイメージ▼  
 ```
 (任意のディレクトリ)\NEZ-DSOCR-winlite
 ├─NEZ-DSOCR-winlite
