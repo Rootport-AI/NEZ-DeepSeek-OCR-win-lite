@@ -21,7 +21,7 @@ DeepSeek-OCRのAI本体のデータおよび詳細な情報は、HuggingFaceの�
   アプリ本体が5GB超、AIモデルが12GB超あります。
 
 # インストール方法
-<img width="1093" height="808" alt="NEZ-DSOCR-winlite-HowtoDL" src="https://github.com/user-attachments/assets/70a53f3a-d117-4740-9edb-c244503b88dd" />  
+[![HuggingFaceDSOCRwinlite](https://github.com/user-attachments/assets/70a53f3a-d117-4740-9edb-c244503b88dd)](https://huggingface.co/datasets/Rootport/NEZ-DeepSeek-OCR-win-lite/tree/main)
 
 1. 私の[HuggingFaceリポジトリ](https://huggingface.co/datasets/Rootport/NEZ-DeepSeek-OCR-win-lite/tree/main)を開いて、`NEZ-DSOCR-winlite.zip`(アプリ本体)、およびAI`DeepSeek-OCR.zip`(AI本体)をダウンロードします。  
 2. インストールしたいディレクトリで`NEZ-DSOCR-winlite.zip`を展開してください。  
