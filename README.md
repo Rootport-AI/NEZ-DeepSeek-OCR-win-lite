@@ -1,12 +1,12 @@
-#NEZ-DeepSeek-OCR-win-lite
+# NEZ-DeepSeek-OCR-win-lite
 これは、画像認識AI「DeepSeek-OCR」を手軽に動かすためのGUIです。スマートフォン等で撮影したレシートの画像をテキスト化することを主な使用目的として想定しています。[以前作成したWEBアプリ](https://github.com/Rootport-AI/NEZ-DeepSeek-OCR-GUI)のWindows版です。非エンジニア向けに簡単に動かせることを目指しました（NEZ = Non-Engineer's Zapper）。
 
-#DeepSeek-OCRとは？  
+# DeepSeek-OCRとは？  
 中国企業DeepSeek社の開発した、オープンウェイトの画像認識AIです。ローカル環境で（つまり、オフラインのパソコンで）実行できます。ChatGPTやGeminiとは異なり、読み取った画像やテキストのデータを**外部に送信しません**。
 
 DeepSeek-OCRのAI本体のデータおよび詳細な情報は、HuggingFaceの公式リポジトリで公開されています。（※HuggingFaceとは、AI研究者やAI技術者の情報交流サイトです） https://huggingface.co/deepseek-ai/DeepSeek-OCR
 
-#動作検証環境
+# 動作検証環境
 - OS: Windows 11  
   Windows 10でも動くかもしれませんが未検証です。Mac、Linuxは非対応です。
 - GPU: RTX 4070 Ti SUPER  
@@ -14,7 +14,7 @@ DeepSeek-OCRのAI本体のデータおよび詳細な情報は、HuggingFaceの�
 - ストレージ：**最低 18GB**の空き容量。推奨20GB。
   アプリ本体が5GB超、AIモデルが12GB超あります。
 
-#インストール方法
+# インストール方法
 1. 私の[HuggingFaceリポジトリ](https://huggingface.co/datasets/Rootport/NEZ-DeepSeek-OCR-win-lite/tree/main)を開いて、`NEZ-DSOCR-winlite.zip`およびAI`DeepSeek-OCR.zip`をダウンロードします。前者がアプリ本体、後者がアプリ内で動かすAIです。
 2. インストールしたいディレクトリで`NEZ-DSOCR-winlite.zip`を展開してください。
 3. `DeepSeek-OCR.zip`を展開し、`(任意のディレクトリ)\NEZ-DeepSeek-OCR-win-lite\NEZ"`に配置してください。
