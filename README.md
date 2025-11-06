@@ -21,30 +21,33 @@ DeepSeek-OCRのAI本体のデータおよび詳細な情報は、HuggingFaceの�
   アプリ本体が5GB超、AIモデルが12GB超あります。
 
 # インストール方法
-1. 私の[HuggingFaceリポジトリ](https://huggingface.co/datasets/Rootport/NEZ-DeepSeek-OCR-win-lite/tree/main)を開いて、`NEZ-DSOCR-winlite.zip`(アプリ本体)、およびAI`DeepSeek-OCR.zip`(AI本体)をダウンロードします。
-2. インストールしたいディレクトリで`NEZ-DSOCR-winlite.zip`を展開してください。
-3. `DeepSeek-OCR.zip`を展開し、`(任意のディレクトリ)\NEZ-DeepSeek-OCR-win-lite\NEZ"`に配置してください。
+[![HuggingFaceDSOCRwinlite](https://github.com/user-attachments/assets/70a53f3a-d117-4740-9edb-c244503b88dd)](https://huggingface.co/datasets/Rootport/NEZ-DeepSeek-OCR-win-lite/tree/main)
+
+1. 私の[HuggingFaceリポジトリ](https://huggingface.co/datasets/Rootport/NEZ-DeepSeek-OCR-win-lite/tree/main)を開いて、`NEZ-DSOCR-winlite.zip`(アプリ本体)、およびAI`DeepSeek-OCR.zip`(AI本体)をダウンロードします。  
+2. インストールしたいディレクトリで`NEZ-DSOCR-winlite.zip`を展開してください。  
+3. `DeepSeek-OCR.zip`を展開し、`\NEZ-DeepSeek-OCR-win-lite\NEZ"`に配置してください。  
 4. `NEZ-DSOCR-winlite.exe`をダブルクリックするとアプリが起動します。
-**注意:**アプリの起動時に一緒に立ち上がる「黒い画面」は、**閉じないでください。** デバッグ用のログがここに表示されます。アプリのウィンドウを閉じると、この「黒い画面」も一緒に閉じます。
+   （※初回起動時は非常に時間がかかります。起動に5分間、OCR開始までに2～3分間ほどかかります。）
 
-<img width="1093" height="808" alt="NEZ-DSOCR-winlite-HowtoDL" src="https://github.com/user-attachments/assets/70a53f3a-d117-4740-9edb-c244503b88dd" />
+**注意:** アプリの起動時に一緒に立ち上がる「黒い画面」は、**閉じないでください。** デバッグ用のログがここに表示されます。アプリのウィンドウを閉じると、この「黒い画面」も一緒に閉じます。  
 
-### ▼展開後のディレクトリ構成のイメージ▼
+### ▼展開後のディレクトリ構成のイメージ▼  
 ```
-(任意のディレクトリ)\NEZ-DeepSeek-OCR-win-lite
-│  NEZ-DSOCR-winlit.exe
+(任意のディレクトリ)\NEZ-DSOCR-winlite
+├─NEZ-DSOCR-winlite
+│      NEZ-DSOCR-winlit.exe ←アプリ本体
 │
-├─asset #アイコン画像など
+├─asset
 ├─NEZ
-│ 　　 # ★ここに解凍したDeepSeek-OCR本体をフォルダごと置く
+│ 　　  DeepSeek-OCR ←★ここに解凍したAI本体をフォルダごと置く
 │      settings.json.txt
 │
-├─NEZ.Shell #中身はシェルを動かすためのコンポーネント
+├─NEZ.Shell 
 └─server
     │  app.py
     │
-    ├─build #中身はサーバーを動かすためのPythonコンポーネント
-    ├─dist #中身はサーバーを動かすためのPythonコンポーネント
+    ├─build 
+    ├─dist 
     └─static
             index.html
             main.js
