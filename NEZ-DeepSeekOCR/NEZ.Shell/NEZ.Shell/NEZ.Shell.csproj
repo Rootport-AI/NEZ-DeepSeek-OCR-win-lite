@@ -5,7 +5,12 @@
 		<UseWPF>true</UseWPF>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<ApplicationIcon>icon_256x256.ico</ApplicationIcon>
+		<AssemblyName>NEZ-DSOCR-winlite</AssemblyName>
 	</PropertyGroup>
+	<ItemGroup>
+	  <Content Include="icon_256x256.ico" />
+	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2420.47" />
 		<PackageReference Include="System.Text.Json" Version="8.0.5" />
