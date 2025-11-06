@@ -31,20 +31,21 @@ DeepSeek-OCRのAI本体のデータおよび詳細な情報は、HuggingFaceの�
 
 ### ▼展開後のディレクトリ構成のイメージ▼
 ```
-(任意のディレクトリ)\NEZ-DeepSeek-OCR-win-lite
-│  NEZ-DSOCR-winlit.exe
+(任意のディレクトリ)\NEZ-DSOCR-winlite
+├─NEZ-DSOCR-winlite
+│      NEZ-DSOCR-winlit.exe ←アプリ本体
 │
-├─asset #アイコン画像など
+├─asset
 ├─NEZ
-│ 　　 # ★ここに解凍したDeepSeek-OCR本体をフォルダごと置く
+│ 　　  ←★ここに解凍したDeepSeek-OCR本体をフォルダごと置く
 │      settings.json.txt
 │
-├─NEZ.Shell #中身はシェルを動かすためのコンポーネント
+├─NEZ.Shell 
 └─server
     │  app.py
     │
-    ├─build #中身はサーバーを動かすためのPythonコンポーネント
-    ├─dist #中身はサーバーを動かすためのPythonコンポーネント
+    ├─build 
+    ├─dist 
     └─static
             index.html
             main.js
