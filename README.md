@@ -37,7 +37,7 @@ DeepSeek-OCRのAI本体のデータおよび詳細な情報は、HuggingFaceの�
 │
 ├─asset
 ├─NEZ
-│ 　　  ←★ここに解凍したDeepSeek-OCR本体をフォルダごと置く
+│ 　　  DeepSeek-OCR ←★ここに解凍したAI本体をフォルダごと置く
 │      settings.json.txt
 │
 ├─NEZ.Shell 
