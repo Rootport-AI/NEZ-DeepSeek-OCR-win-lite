@@ -1,8 +1,11 @@
 # NEZ-DeepSeek-OCR-win-lite
-これは、画像認識AI「DeepSeek-OCR」を手軽に動かすためのGUIです。
-主な使用目的として、スマートフォン等で撮影したレシートの画像のテキスト化を想定しています。
-[以前作成したWEBアプリ](https://github.com/Rootport-AI/NEZ-DeepSeek-OCR-GUI)のWindows版。
-非エンジニア向けに簡単に動かせることを目指しました（NEZ = Non-Engineer's Zapper）。
+
+![NEZ-DSOCR-winlite](https://github.com/user-attachments/assets/6808e3a3-a62e-4801-8331-fcba5d15343b)
+
+画像認識AI「DeepSeek-OCR」を手軽に動かすGUIです。  
+主な使用目的として、スマートフォン等で撮影したレシートの画像のテキスト化を想定しています。  
+[以前作成したWEBアプリ](https://github.com/Rootport-AI/NEZ-DeepSeek-OCR-GUI)のWindows版。  
+非エンジニア向けに簡単に動かせることを目指しました（NEZ = Non-Engineer's Zapper）。  
 
 # DeepSeek-OCRとは？  
 中国企業DeepSeek社の開発した、オープンウェイトの画像認識AIです。ローカル環境で（つまり、オフラインのパソコンで）実行できます。ChatGPTやGeminiとは異なり、読み取った画像やテキストのデータを**外部に送信しません**。
