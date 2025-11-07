@@ -16,7 +16,7 @@ DeepSeek-OCRのAI本体のデータおよび詳細な情報は、HuggingFaceの�
 - OS: Windows 11  
   Windows 10でも動くかもしれませんが未検証です。Mac、Linuxは非対応です。
 - GPU: RTX 4070 Ti SUPER  
-  現状ではVRAM 12GB以上のCUDA対応GPU（※基本的にはNVIDIA製GPU）が推奨です。低VRAMマシンやCPU演算は、将来的に対応するかも。
+  現状ではVRAM 12GB以上のCUDA対応GPU（※基本的にはNVIDIA製GPU）が必須です。低VRAMマシンやCPU演算は、将来的に対応するかも。
 - ストレージ：**最低 18GB**の空き容量。推奨20GB。
   アプリ本体が5GB超、AIモデルが12GB超あります。
 
